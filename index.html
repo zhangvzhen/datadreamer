@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数据织梦者</title>
-    <link rel="stylesheet" href="/datadreamer/styles.css">
+    <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
     <div class="container">
@@ -15,21 +15,39 @@
 
         <main class="content">
             <div class="input-section">
-                <div class="video-upload" id="videoUploadArea">
-                    <input type="file" id="videoInput" accept="video/*" hidden>
-                    <div class="upload-placeholder" id="uploadPlaceholder">
-                        <svg class="upload-icon" viewBox="0 0 24 24" width="64" height="64">
-                            <path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
-                        </svg>
-                        <p>点击或拖拽上传视频</p>
-                        <span class="upload-hint">支持 MP4、WebM 等主流格式</span>
+                <div class="upload-container">
+                    <div class="image-upload" id="imageUploadArea">
+                        <input type="file" id="imageInput" accept="image/*" hidden>
+                        <div class="upload-placeholder" id="imageUploadPlaceholder">
+                            <svg class="upload-icon" viewBox="0 0 24 24" width="64" height="64">
+                                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                            </svg>
+                            <p>点击或拖拽上传图片</p>
+                            <span class="upload-hint">支持 JPG、PNG 等主流格式</span>
+                        </div>
+                        <img id="imagePreview" hidden>
+                        <button class="clear-btn" id="imageClearBtn" hidden>
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
                     </div>
-                    <video id="videoPreview" controls hidden></video>
-                    <button class="clear-btn" id="clearBtn" hidden>
-                        <svg viewBox="0 0 24 24" width="16" height="16">
-                            <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                        </svg>
-                    </button>
+                    <div class="video-upload" id="videoUploadArea">
+                        <input type="file" id="videoInput" accept="video/*" hidden>
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <svg class="upload-icon" viewBox="0 0 24 24" width="64" height="64">
+                                <path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+                            </svg>
+                            <p>点击或拖拽上传视频</p>
+                            <span class="upload-hint">支持 MP4、WebM 等主流格式</span>
+                        </div>
+                        <video id="videoPreview" controls hidden></video>
+                        <button class="clear-btn" id="clearBtn" hidden>
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -76,18 +94,38 @@
         <section class="examples-section">
             <h2>示例</h2>
             <div class="examples-grid">
-                <div class="example-item">
-                    <div class="example-video">
-                        <video src="https://lixin4ever-videollama2.hf.space/file=/tmp/gradio/97c611fa44697d3c14f0080e209b37956cdc0f2d/rap.mp4" controls></video>
+                <!-- 左侧图片示例 -->
+                <div class="examples-column image-examples">
+                    <h3>图片示例</h3>
+                    <div class="example-item">
+                        <div class="example-image">
+                            <img src="./lyj.jpg" alt="示例图片1">
+                        </div>
+                        <p class="example-prompt">这张图片展示了什么内容？</p>
                     </div>
-                    <p class="example-prompt">视频中发生了什么？</p>
+                    <div class="example-item">
+                        <div class="example-image">
+                            <img src="./alice.jpg" alt="示例图片2">
+                        </div>
+                        <p class="example-prompt">描述图片中的主要元素</p>
+                    </div>
                 </div>
-                
-                <div class="example-item">
-                    <div class="example-video">
-                        <video src="https://lixin4ever-videollama2.hf.space/file=/tmp/gradio/97c611fa44697d3c14f0080e209b37956cdc0f2d/rap.mp4" controls></video>
+
+                <!-- 右侧视频示例 -->
+                <div class="examples-column video-examples">
+                    <h3>视频示例</h3>
+                    <div class="example-item">
+                        <div class="example-video">
+                            <video src="https://lixin4ever-videollama2.hf.space/file=/tmp/gradio/97c611fa44697d3c14f0080e209b37956cdc0f2d/rap.mp4" controls></video>
+                        </div>
+                        <p class="example-prompt">视频中发生了什么？</p>
                     </div>
-                    <p class="example-prompt">描述视频中的主要动作</p>
+                    <div class="example-item">
+                        <div class="example-video">
+                            <video src="https://lixin4ever-videollama2.hf.space/file=/tmp/gradio/97c611fa44697d3c14f0080e209b37956cdc0f2d/rap.mp4" controls></video>
+                        </div>
+                        <p class="example-prompt">描述视频中的主要动作</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -111,7 +149,7 @@
             <div class="team-grid">
                 <div class="team-member">
                     <div class="member-photo">
-                        <img src="/datadreamer/lyj.jpg" alt="团队成员1">
+                        <img src="./lyj.jpg" alt="团队成员1">
                     </div>
                     <div class="member-info">
                         <h4>罗乙军</h4>
@@ -121,7 +159,7 @@
                 </div>
                 <div class="team-member">
                     <div class="member-photo">
-                        <img src="/datadreamer/alice.jpg" alt="团队成员2">
+                        <img src="./alice.jpg" alt="团队成员2">
                     </div>
                     <div class="member-info">
                         <h4>艾丽斯</h4>
@@ -131,7 +169,7 @@
                 </div>
                 <div class="team-member">
                     <div class="member-photo">
-                        <img src="/datadreamer/zwz.jpg" alt="团队成员3">
+                        <img src="./zwz.jpg" alt="团队成员3">
                     </div>
                     <div class="member-info">
                         <h4>张玮臻</h4>
@@ -141,7 +179,7 @@
                 </div>
                 <div class="team-member">
                     <div class="member-photo">
-                        <img src="/datadreamer/dx.png" alt="团队成员4">
+                        <img src="./dx.png" alt="团队成员4">
                     </div>
                     <div class="member-info">
                         <h4>段祥</h4>
@@ -152,6 +190,6 @@
             </div>
         </section>
     </div>
-    <script src="/datadreamer/script.js"></script>
+    <script src="./script.js"></script>
 </body>
 </html> 

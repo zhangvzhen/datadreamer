@@ -221,6 +221,13 @@ textarea:focus {
     opacity: 1;
 }
 
+.video-upload:hover .upload-icon {
+    color: #3f51b5;
+    opacity: 1;
+    transform: translateY(-5px);
+    filter: drop-shadow(0 4px 8px rgba(63, 81, 181, 0.2));
+}
+
 .upload-placeholder {
     display: flex;
     flex-direction: column;
@@ -234,13 +241,6 @@ textarea:focus {
     opacity: 0.8;
     transition: all 0.3s ease;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-}
-
-.video-upload:hover .upload-icon {
-    color: #3f51b5;
-    opacity: 1;
-    transform: translateY(-5px);
-    filter: drop-shadow(0 4px 8px rgba(63, 81, 181, 0.2));
 }
 
 .upload-placeholder p {
@@ -284,41 +284,49 @@ textarea:focus {
 
 .examples-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 2rem;
 }
 
-.example-item {
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.example-item::before {
-    content: '点击使用此示例';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(63, 81, 181, 0.9);
-    color: white;
+.examples-column {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 2;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.example-item:hover::before {
-    opacity: 1;
+.examples-column h3 {
+    color: #3f51b5;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.example-item {
+    background: #fafbff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #e8eaf6;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.example-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(63, 81, 181, 0.15);
+    border-color: #3f51b5;
+}
+
+.example-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
 }
 
 .example-video video {
     width: 100%;
+    height: 200px;
+    object-fit: cover;
     border-radius: 8px 8px 0 0;
 }
 
@@ -496,6 +504,10 @@ textarea:focus {
         padding: 0 1.5rem;
         font-size: 0.95rem;
         min-width: 120px;
+    }
+
+    .examples-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -853,5 +865,358 @@ textarea::-webkit-scrollbar-thumb:hover {
     .member-photo {
         width: 100px;
         height: 100px;
+    }
+}
+
+.input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+.image-upload {
+    border: 2px dashed rgba(121, 134, 203, 0.4);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(248, 249, 255, 0.8);
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.image-upload::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(135deg, #3f51b5, #7986cb);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-upload:hover::before {
+    opacity: 1;
+}
+
+.image-upload:hover .upload-icon {
+    color: #3f51b5;
+    opacity: 1;
+    transform: translateY(-5px);
+    filter: drop-shadow(0 4px 8px rgba(63, 81, 181, 0.2));
+}
+
+#imagePreview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+#imagePreview:not([hidden]) {
+    max-height: calc(100vh - 400px);
+    min-height: 200px;
+}
+
+.upload-placeholder {
+    transition: opacity 0.3s ease;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    #imagePreview:not([hidden]) {
+        max-height: calc(100vh - 300px);
+        min-height: 150px;
+    }
+    
+    .image-upload {
+        min-height: 150px;
+        padding: 1rem;
+    }
+}
+
+.video-upload {
+    min-height: 200px;
+}
+
+/* 调整响应式布局 */
+@media (max-width: 1024px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+
+    .upload-container {
+        gap: 1rem;
+    }
+
+    .image-upload, .video-upload {
+        min-height: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .image-upload, .video-upload {
+        min-height: 150px;
+        padding: 1rem;
+    }
+}
+
+/* 添加抖动动画效果 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.video-upload.shake {
+    animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    border-color: #ff5252;
+}
+
+.image-upload.shake {
+    animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    border-color: #ff5252;
+}
+
+/* 优化提示框样式 */
+.toast.warning .toast-content {
+    color: #ff5252;
+}
+
+.toast.warning .toast-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* 团队成员展示样式 */
+.team-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(121, 134, 203, 0.2);
+}
+
+.team-section h3 {
+    color: #3f51b5;
+    font-size: 1.4rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.team-member {
+    text-align: center;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(63, 81, 181, 0.15);
+}
+
+.member-photo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.member-photo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(63, 81, 181, 0.2);
+}
+
+/* 移除放大提示 */
+.member-photo::after {
+    display: none;
+}
+
+.member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.member-photo:hover img {
+    transform: scale(1.1);
+}
+
+.member-info h4 {
+    color: #1a237e;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.member-info p {
+    color: #5c6bc0;
+    margin-bottom: 0.5rem;
+}
+
+.member-desc {
+    font-size: 0.9rem;
+    color: #7986cb;
+    line-height: 1.4;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .team-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .member-photo {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+.input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+.image-upload {
+    border: 2px dashed rgba(121, 134, 203, 0.4);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(248, 249, 255, 0.8);
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.image-upload::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 2px;
+    background: linear-gradient(135deg, #3f51b5, #7986cb);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-upload:hover::before {
+    opacity: 1;
+}
+
+.image-upload:hover .upload-icon {
+    color: #3f51b5;
+    opacity: 1;
+    transform: translateY(-5px);
+    filter: drop-shadow(0 4px 8px rgba(63, 81, 181, 0.2));
+}
+
+#imagePreview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+#imagePreview:not([hidden]) {
+    max-height: calc(100vh - 400px);
+    min-height: 200px;
+}
+
+.upload-placeholder {
+    transition: opacity 0.3s ease;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    #imagePreview:not([hidden]) {
+        max-height: calc(100vh - 300px);
+        min-height: 150px;
+    }
+    
+    .image-upload {
+        min-height: 150px;
+        padding: 1rem;
+    }
+}
+
+.video-upload {
+    min-height: 200px;
+}
+
+/* 调整响应式布局 */
+@media (max-width: 1024px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+
+    .upload-container {
+        gap: 1rem;
+    }
+
+    .image-upload, .video-upload {
+        min-height: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .image-upload, .video-upload {
+        min-height: 150px;
+        padding: 1rem;
     }
 } 

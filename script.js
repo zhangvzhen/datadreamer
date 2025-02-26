@@ -7,6 +7,71 @@ document.addEventListener('DOMContentLoaded', function() {
     const promptText = document.getElementById('promptText');
     const resultContent = document.getElementById('resultContent');
 
+    // 图片上传相关元素
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const imageUploadPlaceholder = document.getElementById('imageUploadPlaceholder');
+    const imageClearBtn = document.getElementById('imageClearBtn');
+
+    // 处理图片上传
+    imageUploadArea.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    imageUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        imageUploadArea.style.borderColor = '#2196F3';
+    });
+
+    imageUploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        imageUploadArea.style.borderColor = '#ccc';
+    });
+
+    imageUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        imageUploadArea.style.borderColor = '#ccc';
+        
+        const files = e.dataTransfer.files;
+        if (files.length && files[0].type.startsWith('image/')) {
+            handleImageFile(files[0]);
+        }
+    });
+
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleImageFile(e.target.files[0]);
+        }
+    });
+
+    function handleImageFile(file) {
+        const url = URL.createObjectURL(file);
+        imagePreview.src = url;
+        imagePreview.hidden = false;
+        imageUploadPlaceholder.style.display = 'none';
+        
+        imageClearBtn.hidden = false;
+        setTimeout(() => {
+            imageClearBtn.classList.add('visible');
+        }, 10);
+    }
+
+    imageClearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        imagePreview.src = '';
+        imagePreview.hidden = true;
+        imageUploadPlaceholder.style.display = 'flex';
+        
+        imageClearBtn.classList.remove('visible');
+        setTimeout(() => {
+            imageClearBtn.hidden = true;
+        }, 300);
+        
+        imageInput.value = '';
+    });
+    
     // 处理视频上传
     videoUploadArea.addEventListener('click', () => {
         videoInput.click();
@@ -152,11 +217,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 修改提交按钮点击事件
     submitBtn.addEventListener('click', async () => {
-        if (!videoPreview.src) {
-            showToast('请先上传视频后再提问', 'warning');
+        const hasVideo = videoPreview.src && !videoPreview.hidden;
+        const hasImage = imagePreview.src && !imagePreview.hidden;
+
+        if (!hasVideo && !hasImage) {
+            showToast('请至少上传一张图片或一个视频后再提问', 'warning');
             videoUploadArea.classList.add('shake');
+            imageUploadArea.classList.add('shake');
             setTimeout(() => {
                 videoUploadArea.classList.remove('shake');
+                imageUploadArea.classList.remove('shake');
             }, 650);
             return;
         }
@@ -175,24 +245,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const loadingMessage = addMessage(`
             <div class="loading">
                 <div class="loading-spinner"></div>
-                <span>AI正在分析视频...</span>
+                <span>AI正在分析${hasVideo ? '视频' : '图片'}...</span>
             </div>
         `, 'ai');
 
         try {
-
-            // // 获取视频文件
-            // const videoFile = await fetch(videoPreview.src).then(r => r.blob());
-            
-            // // 调用API
-            // const answer = await API.analyzeVideo(videoFile, question);
-            // addMessage(answer, 'ai');
-            
             // 模拟API响应
-            await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
             // 模拟的回答
-            const simulatedAnswer = "这是一个模拟的AI回答......";
+            const mediaType = hasVideo ? '视频' : '图片';
+            const simulatedAnswer = `这是一个关于${mediaType}的模拟AI回答......`;
             
             // 移除加载消息
             loadingMessage.remove();
@@ -213,15 +276,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 添加回车提交功能
+    // 修改回车提交功能
     promptText.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            if (!videoPreview.src) {
-                showToast('请先上传视频后再提问', 'warning');
+            const hasVideo = videoPreview.src && !videoPreview.hidden;
+            const hasImage = imagePreview.src && !imagePreview.hidden;
+
+            if (!hasVideo && !hasImage) {
+                showToast('请至少上传一张图片或一个视频后再提问', 'warning');
                 videoUploadArea.classList.add('shake');
+                imageUploadArea.classList.add('shake');
                 setTimeout(() => {
                     videoUploadArea.classList.remove('shake');
+                    imageUploadArea.classList.remove('shake');
                 }, 650);
                 return;
             }
@@ -328,19 +396,33 @@ document.addEventListener('DOMContentLoaded', function() {
             item.addEventListener('click', () => {
                 try {
                     const exampleVideo = item.querySelector('video');
+                    const exampleImage = item.querySelector('.example-image img');
                     const examplePrompt = item.querySelector('.example-prompt').textContent;
                     
-                    // 直接复制视频源和状态
-                    videoPreview.src = exampleVideo.src;
-                    videoPreview.hidden = false;
-                    uploadPlaceholder.style.display = 'none';
-                    
-                    // 显示撤销按钮
-                    const clearBtn = document.getElementById('clearBtn');
-                    clearBtn.hidden = false;
-                    setTimeout(() => {
-                        clearBtn.classList.add('visible');
-                    }, 10);
+                    if (exampleVideo) {
+                        // 处理视频示例
+                        videoPreview.src = exampleVideo.src;
+                        videoPreview.hidden = false;
+                        uploadPlaceholder.style.display = 'none';
+                        
+                        // 显示视频清除按钮
+                        const clearBtn = document.getElementById('clearBtn');
+                        clearBtn.hidden = false;
+                        setTimeout(() => {
+                            clearBtn.classList.add('visible');
+                        }, 10);
+                    } else if (exampleImage) {
+                        // 处理图片示例
+                        imagePreview.src = exampleImage.src;
+                        imagePreview.hidden = false;
+                        imageUploadPlaceholder.style.display = 'none';
+                        
+                        // 显示图片清除按钮
+                        imageClearBtn.hidden = false;
+                        setTimeout(() => {
+                            imageClearBtn.classList.add('visible');
+                        }, 10);
+                    }
                     
                     // 设置问题文本
                     promptText.value = examplePrompt;
@@ -383,4 +465,5 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return messageDiv;
     }
+
 }); 

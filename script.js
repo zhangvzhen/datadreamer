@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 4. API 交互
     const API = {
-        baseUrl: 'http://localhost:1234/v1/chat', // 本地服务器地址
+        baseUrl: 'http://10.68.239.235:1234/v1/chat', // 本地服务器地址
 
         // 发送媒体和问题到后端
         async analyzeMedia(mediaFile, question, type) {

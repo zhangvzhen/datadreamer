@@ -213,18 +213,19 @@ document.addEventListener('DOMContentLoaded', function() {
         `, 'ai');
 
         try {
-            // 模拟API响应
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // 模拟的回答
-            const mediaType = hasVideo ? '视频' : '图片';
-            const simulatedAnswer = `这是一个关于${mediaType}的模拟AI回答......`;
+            // 调用 API
+            const mediaType = hasVideo ? 'video' : 'image';
+            const answer = await API.analyzeMedia(
+                hasVideo ? videoPreview.src : imagePreview.src,
+                question,
+                mediaType
+            );
             
             // 移除加载消息
             loadingMessage.remove();
             
             // 添加AI回答
-            addMessage(simulatedAnswer, 'ai');
+            addMessage(answer, 'ai');
             
             // 清空输入框
             promptText.value = '';
@@ -278,6 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        const question = lastUserMessage.querySelector('.message-content').textContent;
+
         // 删除最后一条AI回答
         const lastAiMessage = messages[messages.length - 1];
         if (lastAiMessage.classList.contains('ai')) {
@@ -296,19 +299,9 @@ document.addEventListener('DOMContentLoaded', function() {
         `, 'ai');
 
         try {
-
-            // const newAnswer = await API.regenerateAnswer(question, previousAnswer);
-            // loadingMessage.remove();
-            // addMessage(newAnswer, 'ai');
-
-            // 模拟API延迟
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // 模拟的新回答
-            const simulatedNewAnswer = "这是模拟重新生成的回答......";
-            
+            const newAnswer = await API.regenerateAnswer(question);
             loadingMessage.remove();
-            addMessage(simulatedNewAnswer, 'ai');
+            addMessage(newAnswer, 'ai');
         } catch (error) {
             loadingMessage.remove();
             addMessage('重新生成失败，请稍后重试。', 'ai');
@@ -426,43 +419,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 4. API 交互
     const API = {
-        baseUrl: 'http://your-backend-url.com/api', // 替换为实际的后端API地址
+        baseUrl: 'http://localhost:1234/v1/chat', // 本地服务器地址
 
-        // 发送视频和问题到后端
-        async analyzeVideo(videoFile, question) {
+        // 发送媒体和问题到后端
+        async analyzeMedia(mediaFile, question, type) {
             try {
-                const formData = new FormData();
-                formData.append('video', videoFile);
-                formData.append('question', question);
+                const messages = [
+                    {
+                        role: "system",
+                        content: `You are analyzing a ${type}. Please provide detailed analysis.`
+                    },
+                    {
+                        role: "user",
+                        content: question
+                    }
+                ];
 
-                const response = await fetch(`${this.baseUrl}/analyze`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.answer;
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
-            }
-        },
-
-        // 重新生成答案
-        async regenerateAnswer(question, previousAnswer) {
-            try {
-                const response = await fetch(`${this.baseUrl}/regenerate`, {
+                const response = await fetch(`${this.baseUrl}/completions`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        question,
-                        previousAnswer
+                        model: "deepseek-r1-distill-qwen-7b",
+                        messages: messages,
+                        temperature: 0.7,
+                        max_tokens: -1,
+                        stream: false
                     })
                 });
 
@@ -471,7 +454,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 const data = await response.json();
-                return data.answer;
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        },
+
+        // 重新生成答案
+        async regenerateAnswer(question) {
+            try {
+                const messages = [
+                    {
+                        role: "system",
+                        content: "Please provide a new analysis for the previous question."
+                    },
+                    {
+                        role: "user",
+                        content: question
+                    }
+                ];
+
+                const response = await fetch(`${this.baseUrl}/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-r1-distill-qwen-7b",
+                        messages: messages,
+                        temperature: 0.7,
+                        max_tokens: -1,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.choices[0].message.content;
             } catch (error) {
                 console.error('API Error:', error);
                 throw error;

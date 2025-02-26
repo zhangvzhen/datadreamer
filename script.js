@@ -1,4 +1,6 @@
+// 确保 DOM 加载完成后执行
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. 初始化变量
     const videoUploadArea = document.getElementById('videoUploadArea');
     const videoInput = document.getElementById('videoInput');
     const videoPreview = document.getElementById('videoPreview');
@@ -14,21 +16,83 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageUploadPlaceholder = document.getElementById('imageUploadPlaceholder');
     const imageClearBtn = document.getElementById('imageClearBtn');
 
-    // 处理图片上传
-    imageUploadArea.addEventListener('click', () => {
-        imageInput.click();
-    });
+    // 2. 工具函数
+    function showToast(message, type = 'warning') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <svg class="toast-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
 
+        // 动画显示
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // 自动消失
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function addMessage(content, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${type}`;
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                ${content}
+            </div>
+        `;
+        resultContent.appendChild(messageDiv);
+        
+        // 滚动到底部
+        resultContent.scrollTop = resultContent.scrollHeight;
+        
+        return messageDiv;
+    }
+
+    function handleVideoFile(file) {
+        const url = URL.createObjectURL(file);
+        videoPreview.src = url;
+        videoPreview.hidden = false;
+        uploadPlaceholder.style.display = 'none';
+        
+        // 显示撤销按钮
+        const clearBtn = document.getElementById('clearBtn');
+        clearBtn.hidden = false;
+        setTimeout(() => {
+            clearBtn.classList.add('visible');
+        }, 10);
+    }
+
+    function handleImageFile(file) {
+        const url = URL.createObjectURL(file);
+        imagePreview.src = url;
+        imagePreview.hidden = false;
+        imageUploadPlaceholder.style.display = 'none';
+        
+        imageClearBtn.hidden = false;
+        setTimeout(() => {
+            imageClearBtn.classList.add('visible');
+        }, 10);
+    }
+
+    // 3. 事件监听器
+    // 图片上传相关
+    imageUploadArea.addEventListener('click', () => imageInput.click());
     imageUploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         imageUploadArea.style.borderColor = '#2196F3';
     });
-
     imageUploadArea.addEventListener('dragleave', (e) => {
         e.preventDefault();
         imageUploadArea.style.borderColor = '#ccc';
     });
-
     imageUploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         imageUploadArea.style.borderColor = '#ccc';
@@ -45,33 +109,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function handleImageFile(file) {
-        const url = URL.createObjectURL(file);
-        imagePreview.src = url;
-        imagePreview.hidden = false;
-        imageUploadPlaceholder.style.display = 'none';
-        
-        imageClearBtn.hidden = false;
-        setTimeout(() => {
-            imageClearBtn.classList.add('visible');
-        }, 10);
-    }
-
+    // 添加图片清除按钮点击事件
     imageClearBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         
+        // 重置图片上传区域
         imagePreview.src = '';
         imagePreview.hidden = true;
         imageUploadPlaceholder.style.display = 'flex';
         
+        // 隐藏清除按钮
         imageClearBtn.classList.remove('visible');
         setTimeout(() => {
             imageClearBtn.hidden = true;
         }, 300);
         
+        // 清空文件输入
         imageInput.value = '';
     });
-    
+
     // 处理视频上传
     videoUploadArea.addEventListener('click', () => {
         videoInput.click();
@@ -103,20 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function handleVideoFile(file) {
-        const url = URL.createObjectURL(file);
-        videoPreview.src = url;
-        videoPreview.hidden = false;
-        uploadPlaceholder.style.display = 'none';
-        
-        // 显示撤销按钮
-        const clearBtn = document.getElementById('clearBtn');
-        clearBtn.hidden = false;
-        setTimeout(() => {
-            clearBtn.classList.add('visible');
-        }, 10);
-    }
-
     // 修改清除按钮的点击事件处理
     document.getElementById('clearBtn').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -135,85 +177,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         videoInput.value = '';
     });
-
-    // 添加提示框显示函数
-    function showToast(message, type = 'warning') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-            <div class="toast-content">
-                <svg class="toast-icon" viewBox="0 0 24 24" width="20" height="20">
-                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-                <span>${message}</span>
-            </div>
-        `;
-        document.body.appendChild(toast);
-
-        // 动画显示
-        setTimeout(() => toast.classList.add('show'), 10);
-
-        // 自动消失
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-
-    // 添加API交互模块
-    const API = {
-        baseUrl: 'http://your-backend-url.com/api', // 替换为实际的后端API地址
-
-        // 发送视频和问题到后端
-        async analyzeVideo(videoFile, question) {
-            try {
-                const formData = new FormData();
-                formData.append('video', videoFile);
-                formData.append('question', question);
-
-                const response = await fetch(`${this.baseUrl}/analyze`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.answer;
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
-            }
-        },
-
-        // 重新生成答案
-        async regenerateAnswer(question, previousAnswer) {
-            try {
-                const response = await fetch(`${this.baseUrl}/regenerate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        question,
-                        previousAnswer
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.answer;
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
-            }
-        }
-    };
 
     // 修改提交按钮点击事件
     submitBtn.addEventListener('click', async () => {
@@ -362,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
         promptText.value = '';
         promptText.closest('.prompt-input').setAttribute('data-length', '0');
         
-        // 如果有视频，也清空视频
+        // 清空视频
         if (!videoPreview.hidden) {
             videoPreview.src = '';
             videoPreview.hidden = true;
@@ -373,6 +336,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearBtn.hidden = true;
             }, 300);
             videoInput.value = '';
+        }
+        
+        // 清空图片
+        if (!imagePreview.hidden) {
+            imagePreview.src = '';
+            imagePreview.hidden = true;
+            imageUploadPlaceholder.style.display = 'flex';
+            imageClearBtn.classList.remove('visible');
+            setTimeout(() => {
+                imageClearBtn.hidden = true;
+            }, 300);
+            imageInput.value = '';
         }
     });
 
@@ -449,21 +424,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setupExampleHandlers();
 
-    // 添加消息到聊天记录
-    function addMessage(content, type) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `chat-message ${type}`;
-        messageDiv.innerHTML = `
-            <div class="message-content">
-                ${content}
-            </div>
-        `;
-        resultContent.appendChild(messageDiv);
-        
-        // 滚动到底部
-        resultContent.scrollTop = resultContent.scrollHeight;
-        
-        return messageDiv;
-    }
+    // 4. API 交互
+    const API = {
+        baseUrl: 'http://your-backend-url.com/api', // 替换为实际的后端API地址
 
+        // 发送视频和问题到后端
+        async analyzeVideo(videoFile, question) {
+            try {
+                const formData = new FormData();
+                formData.append('video', videoFile);
+                formData.append('question', question);
+
+                const response = await fetch(`${this.baseUrl}/analyze`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.answer;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        },
+
+        // 重新生成答案
+        async regenerateAnswer(question, previousAnswer) {
+            try {
+                const response = await fetch(`${this.baseUrl}/regenerate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question,
+                        previousAnswer
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.answer;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+    };
 }); 

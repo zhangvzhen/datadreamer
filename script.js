@@ -213,13 +213,19 @@ document.addEventListener('DOMContentLoaded', function() {
         `, 'ai');
 
         try {
-            // 调用 API
-            const mediaType = hasVideo ? 'video' : 'image';
-            const answer = await API.analyzeMedia(
-                hasVideo ? videoPreview.src : imagePreview.src,
-                question,
-                mediaType
-            );
+            // 获取当前媒体文件
+            let mediaFile;
+            let mediaType;
+            if (hasVideo) {
+                mediaFile = await fetch(videoPreview.src).then(r => r.blob());
+                mediaType = 'video';
+            } else {
+                mediaFile = await fetch(imagePreview.src).then(r => r.blob());
+                mediaType = 'image';
+            }
+
+            // 调用API
+            const answer = await API.analyzeMedia(mediaFile, question, mediaType);
             
             // 移除加载消息
             loadingMessage.remove();
@@ -281,6 +287,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const question = lastUserMessage.querySelector('.message-content').textContent;
 
+        // 获取当前媒体文件
+        let mediaFile;
+        let mediaType;
+        if (!videoPreview.hidden) {
+            mediaFile = await fetch(videoPreview.src).then(r => r.blob());
+            mediaType = 'video';
+        } else if (!imagePreview.hidden) {
+            mediaFile = await fetch(imagePreview.src).then(r => r.blob());
+            mediaType = 'image';
+        } else {
+            showToast('请先上传媒体文件');
+            return;
+        }
+
         // 删除最后一条AI回答
         const lastAiMessage = messages[messages.length - 1];
         if (lastAiMessage.classList.contains('ai')) {
@@ -299,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `, 'ai');
 
         try {
-            const newAnswer = await API.regenerateAnswer(question);
+            const newAnswer = await API.regenerateAnswer(question, mediaFile, mediaType);
             loadingMessage.remove();
             addMessage(newAnswer, 'ai');
         } catch (error) {
@@ -419,42 +439,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 4. API 交互
     const API = {
-        baseUrl: 'http://10.68.239.235:1234/v1/chat', // 本地服务器地址
+        baseUrl: 'http://localhost:6006', // 修改为您的服务器地址
 
         // 发送媒体和问题到后端
         async analyzeMedia(mediaFile, question, type) {
             try {
-                const messages = [
-                    {
-                        role: "system",
-                        content: `You are analyzing a ${type}. Please provide detailed analysis.`
-                    },
-                    {
-                        role: "user",
-                        content: question
-                    }
-                ];
+                const base64Data = await this.fileToBase64(mediaFile);
+                
+                const requestData = {
+                    message: question,
+                    temperature: 0.2,
+                    top_p: 0.7,
+                    max_output_tokens: 512
+                };
 
-                const response = await fetch(`${this.baseUrl}/completions`, {
+                if (type === 'video') {
+                    requestData.video = base64Data;
+                } else if (type === 'image') {
+                    requestData.image = base64Data;
+                }
+
+                const response = await fetch(`${this.baseUrl}/generate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        model: "deepseek-r1-distill-qwen-7b",
-                        messages: messages,
-                        temperature: 0.7,
-                        max_tokens: -1,
-                        stream: false
-                    })
+                    body: JSON.stringify(requestData)
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                // 检查后端返回的错误
+                if (data.error) {
+                    throw new Error(data.error);
                 }
 
-                const data = await response.json();
-                return data.choices[0].message.content;
+                return data.response;
             } catch (error) {
                 console.error('API Error:', error);
                 throw error;
@@ -462,43 +482,25 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // 重新生成答案
-        async regenerateAnswer(question) {
-            try {
-                const messages = [
-                    {
-                        role: "system",
-                        content: "Please provide a new analysis for the previous question."
-                    },
-                    {
-                        role: "user",
-                        content: question
-                    }
-                ];
+        async regenerateAnswer(question, mediaFile, type) {
+            // 重用analyzeMedia方法，保持一致性
+            return this.analyzeMedia(mediaFile, question, type);
+        },
 
-                const response = await fetch(`${this.baseUrl}/completions`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: "deepseek-r1-distill-qwen-7b",
-                        messages: messages,
-                        temperature: 0.7,
-                        max_tokens: -1,
-                        stream: false
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.choices[0].message.content;
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
-            }
+        // 辅助函数：将文件转换为base64
+        async fileToBase64(file) {
+            if (!file) return null;
+            
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    // 移除Data URL前缀
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = error => reject(error);
+            });
         }
     };
 }); 

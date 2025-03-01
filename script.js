@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 4. API 交互
     const API = {
-        baseUrl: 'http://localhost:6006', // 修改为您的服务器地址
+        baseUrl: 'http://127.0.0.1:6006', // 修改为您的服务器地址
 
         // 发送媒体和问题到后端
         async analyzeMedia(mediaFile, question, type) {
